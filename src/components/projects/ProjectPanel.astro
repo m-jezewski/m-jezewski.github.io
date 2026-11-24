@@ -1,0 +1,451 @@
+---
+import type { Project } from "./projects.data";
+
+interface Props {
+    project: Project;
+    active: boolean;
+}
+
+const { project, active } = Astro.props;
+const { slug, title, description, note, tags, links = {}, media } = project;
+
+const linkList = [
+    links.demo ? { label: "Live demo", href: links.demo } : null,
+    links.source ? { label: "Source", href: links.source } : null,
+].filter((link) => link !== null);
+
+const external = (href: string) =>
+    href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {};
+
+const carousel = media.length > 1;
+---
+
+<div
+    class:list={["panel", active && "is-active"]}
+    role="tabpanel"
+    id={`panel-${slug}`}
+    aria-labelledby={`tab-${slug}`}
+    inert={!active}
+>
+    <media-carousel class="media" data-stagger style="--i: 0">
+        <div
+            class="track"
+            data-track
+            tabindex={carousel ? 0 : undefined}
+            role={carousel ? "group" : undefined}
+            aria-roledescription={carousel ? "carousel" : undefined}
+            aria-label={carousel ? `${title} screenshots` : undefined}
+        >
+            {
+                media.map((item, i) => (
+                    <div class="slide" data-slide>
+                        <img
+                            src={i > 0 || active ? item.src : undefined}
+                            data-src={i === 0 && !active ? item.src : undefined}
+                            alt={item.alt}
+                            loading="lazy"
+                            decoding="async"
+                        />
+                    </div>
+                ))
+            }
+        </div>
+
+        {
+            linkList.length > 0 && (
+                <div class="overlay" aria-hidden="true">
+                    {linkList.map((link, i) => (
+                        <a
+                            href={link.href}
+                            class:list={["overlay-link"]}
+                            tabindex="-1"
+                            {...external(link.href)}
+                        >
+                            {link.label} <span class="arrow">↗</span>
+                        </a>
+                    ))}
+                </div>
+            )
+        }
+
+        {
+            carousel && (
+                <>
+                    <button type="button" class="nav nav-prev" data-prev aria-label="Previous screenshot">
+                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+                    </button>
+                    <button type="button" class="nav nav-next" data-next aria-label="Next screenshot">
+                        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m6 3 5 5-5 5" /></svg>
+                    </button>
+                    <div class="dots">
+                        {media.map((_, i) => (
+                            <button
+                                type="button"
+                                class="dot"
+                                data-dot={i}
+                                aria-label={`Screenshot ${i + 1} of ${media.length}`}
+                                aria-current={i === 0 ? "true" : "false"}
+                            />
+                        ))}
+                    </div>
+                </>
+            )
+        }
+    </media-carousel>
+
+    <h3 class="serif-title" data-stagger style="--i: 1">{title}</h3>
+    <p class="description" data-stagger style="--i: 2">{description}</p>
+    {note && <p class="note" data-stagger style="--i: 2">{note}</p>}
+
+    <div class="tags" data-stagger style="--i: 3">
+        {tags.map((tag) => <span class="tag">{tag}</span>)}
+    </div>
+
+    {
+        linkList.length > 0 && (
+            <div class="links" data-stagger style="--i: 4">
+                {linkList.map((link) => (
+                    <a href={link.href} class="link" {...external(link.href)}>
+                        {link.label}
+                    </a>
+                ))}
+            </div>
+        )
+    }
+</div>
+
+<style>
+    .panel {
+        grid-area: 1 / 1;
+        visibility: hidden;
+        pointer-events: none;
+        transition: visibility 0s linear 160ms;
+    }
+
+    .panel.is-active {
+        visibility: visible;
+        pointer-events: auto;
+        transition: visibility 0s linear 0s;
+    }
+
+    [data-stagger] {
+        --enter-delay: calc(160ms + var(--i, 0) * 55ms);
+
+        opacity: 0;
+        transform: translateY(16px);
+        transition:
+            opacity 160ms cubic-bezier(0.7, 0, 0.84, 0),
+            transform 0s linear 160ms;
+    }
+
+    .panel.is-active [data-stagger] {
+        opacity: 1;
+        transform: translateY(0);
+        transition:
+            opacity 500ms cubic-bezier(0.16, 1, 0.3, 1) var(--enter-delay),
+            transform 500ms cubic-bezier(0.16, 1, 0.3, 1) var(--enter-delay);
+    }
+
+    :global(project-switcher[data-instant]) .panel,
+    :global(project-switcher[data-instant]) [data-stagger] {
+        transition: none !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .panel,
+        .panel.is-active,
+        [data-stagger],
+        .panel.is-active [data-stagger] {
+            transition-duration: 1ms;
+            transition-delay: 0s;
+        }
+    }
+
+    /* ── Media ─────────────────────────────────────────────────────────────────── */
+    .media {
+        position: relative;
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border: 1px solid var(--separatorColor2);
+        background-color: rgba(237, 231, 220, 0.03);
+        margin-bottom: 28px;
+    }
+
+    .track {
+        display: flex;
+        height: 100%;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+    }
+
+    .track::-webkit-scrollbar {
+        display: none;
+    }
+
+    .track:focus-visible {
+        outline: 1px solid var(--accent);
+        outline-offset: -1px;
+    }
+
+    .slide {
+        flex: 0 0 100%;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        overflow: hidden;
+    }
+
+    .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background-color: rgba(11, 11, 12, 0.35);
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 350ms ease;
+    }
+
+    .overlay-link {
+        font-family: var(--fontTertiary);
+        font-size: 13px;
+        color: var(--textPrimary);
+        padding: 10px 16px;
+        border: 1px solid var(--separatorColor);
+        background-color: rgba(11, 11, 12, 0.4);
+        opacity: 0;
+        transform: translateY(8px);
+        transition:
+            opacity 350ms ease,
+            transform 450ms cubic-bezier(0.16, 1, 0.3, 1),
+            color 200ms ease,
+            border-color 200ms ease,
+            background-color 200ms ease;
+    }
+
+    .overlay-link + .overlay-link {
+        transition-delay: 60ms, 60ms, 0s, 0s, 0s;
+    }
+
+    .overlay-link.is-primary {
+        color: var(--bgColor);
+        background-color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .overlay-link:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .overlay-link.is-primary:hover {
+        color: var(--bgColor);
+        background-color: color-mix(in srgb, var(--accent) 80%, white);
+    }
+
+    .arrow {
+        display: inline-block;
+        transition: transform 200ms ease;
+    }
+
+    .overlay-link:hover .arrow {
+        transform: translate(2px, -2px);
+    }
+
+    .nav {
+        position: absolute;
+        top: 50%;
+        z-index: 2;
+        display: none;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: 1px solid var(--separatorColor);
+        border-radius: 50%;
+        background-color: rgba(11, 11, 12, 0.6);
+        color: var(--textPrimary);
+        cursor: pointer;
+        transform: translateY(-50%);
+        transition: opacity 250ms ease, border-color 200ms ease, color 200ms ease;
+    }
+
+    .nav-prev {
+        left: 12px;
+    }
+
+    .nav-next {
+        right: 12px;
+    }
+
+    .nav svg {
+        width: 14px;
+        height: 14px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .nav:hover:not(:disabled) {
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+
+    .nav:disabled {
+        cursor: default;
+        visibility: hidden;
+    }
+
+    .nav:focus-visible,
+    .dot:focus-visible {
+        outline: 1px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    .dots {
+        position: absolute;
+        left: 50%;
+        bottom: 12px;
+        z-index: 2;
+        display: flex;
+        gap: 6px;
+        transform: translateX(-50%);
+    }
+
+    .dot {
+        width: 6px;
+        height: 6px;
+        padding: 0;
+        border: none;
+        border-radius: 3px;
+        background-color: rgba(237, 231, 220, 0.45);
+        cursor: pointer;
+        transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1), background-color 300ms ease;
+    }
+
+    .dot[aria-current="true"] {
+        width: 18px;
+        background-color: var(--accent);
+    }
+
+    /* Touch screens have no hover: they swipe the track and use the links below. */
+    @media (hover: hover) and (pointer: fine) {
+        .overlay {
+            display: flex;
+        }
+
+        .nav {
+            display: grid;
+            opacity: 0;
+        }
+
+        .media:hover .overlay,
+        .media:hover .nav,
+        .nav:focus-visible {
+            opacity: 1;
+        }
+
+        .media:hover .overlay-link {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .media:hover .slide img {
+            transform: scale(1.03);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .slide img,
+        .overlay,
+        .overlay-link,
+        .nav,
+        .dot {
+            transition-duration: 1ms;
+        }
+
+        .media:hover .slide img {
+            transform: none;
+        }
+    }
+
+    h3 {
+        margin-bottom: 14px;
+    }
+
+    .description {
+        font-size: var(--fontSizeContent);
+        color: var(--textSecondary);
+        line-height: 1.55em;
+        letter-spacing: 0.2px;
+        margin-bottom: 20px;
+    }
+
+    .note {
+        font-size: 13px;
+        font-style: italic;
+        color: var(--textSecondary);
+        line-height: 1.55em;
+        margin-top: -8px;
+        margin-bottom: 20px;
+    }
+
+    .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tag {
+        font-family: var(--fontTertiary);
+        border: 1px solid var(--separatorColor);
+        padding: 4px 8px;
+        font-size: 13px;
+        font-weight: 300;
+        color: var(--textSecondary);
+        white-space: nowrap;
+    }
+
+    .links {
+        display: flex;
+        gap: 24px;
+        margin-top: 24px;
+    }
+
+    .link {
+        font-family: var(--fontTertiary);
+        font-size: 13px;
+        color: var(--textPrimary);
+        border-bottom: 1px solid var(--separatorColor);
+        padding-bottom: 4px;
+        transition: border-color 0.2s ease, color 0.2s ease;
+    }
+
+    .link:hover {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+    }
+</style>
+
+<script>
+    import "./media-carousel";
+</script>

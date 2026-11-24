@@ -1,0 +1,256 @@
+---
+import SectionHeader from '../SectionHeader.astro';
+import TimelineEntry from "./TimelineEntry.astro";
+
+type Entry = {
+    kind: "work" | "education";
+    title: string;
+    place: string;
+    start: string; // "YYYY-MM"
+    end: string | "present";
+};
+
+const timeLineData = {
+    master: {
+        kind: "education",
+        place: 'Lublin University of Technology',
+        title: "Master's Degree in Computer Science",
+        start: "2026-10",
+        end: "present",
+    },
+    deeplai: {
+        kind: "work",
+        place: 'Deeplai, Lublin',
+        title: "Frontend Developer",
+        start: "2023-08",
+        end: "present",
+    },
+    bachelor: {
+        kind: "education",
+        place: 'Lublin University of Technology',
+        title: "Bachelor of Engineering in Computer Science",
+        start: "2022-10",
+        end: "2026-03",
+    },
+    technicalSchool: {
+        kind: "education",
+        place: 'Vocational Technical High School for Computer Science, Puławy',
+        title: "Computer Technician",
+        start: "2018-09",
+        end: "2022-04",
+    },
+} satisfies Record<string, Entry>;
+
+const toMonth = (ym: string) => {
+    const [year, month] = ym.split("-").map(Number);
+    return year! * 12 + (month! - 1);
+};
+const today = new Date();
+const nowMonth = today.getFullYear() * 12 + today.getMonth();
+
+const entries: Entry[] = Object.values(timeLineData);
+
+const PAD = 4;
+const PRESENT_LEAD = 12;
+const AXIS_OVERSHOOT = 4;
+const origin = Math.min(...entries.map((e) => toMonth(e.start))) - PAD;
+const span = nowMonth + PRESENT_LEAD - origin;
+
+const place = (id: keyof typeof timeLineData) => {
+    const e: Entry = timeLineData[id];
+    return {
+        id,
+        kind: e.kind,
+        title: e.title,
+        place: e.place,
+        start: toMonth(e.start) - origin,
+        end: e.end === "present" ? span - AXIS_OVERSHOOT : toMonth(e.end) - origin,
+        open: e.end === "present",
+        dates: `${e.start.slice(0, 4)} — ${e.end === "present" ? "present" : e.end.slice(0, 4)}`,
+    };
+};
+---
+
+<div class="content">
+    <SectionHeader id="experience" index="I" title="Experience & education"/>
+    <div class="legend">
+        <div class="legend-point legend-work">Work</div>
+        <div class="legend-point legend-education">Education</div>
+    </div>
+    <experience-timeline
+        class="timeline"
+        data-origin={origin}
+        data-span={span}
+        style={`--span: ${span}; --now: ${nowMonth - origin}`}
+    >
+        <div class="axis" aria-hidden="true"></div>
+        <TimelineEntry {...place("master")}>
+        </TimelineEntry>
+        <TimelineEntry {...place("deeplai")}>
+            <div class="ul">
+                <div class="li">Develop and maintain a SaaS platform built with React, alongside smaller&#8209;scale
+                    projects including
+                    a company website
+                </div>
+                <div class="li">Actively contribute to software design, proposing technical concepts and
+                    solutions in collaboration with the development team
+                </div>
+                <div class="li">Participate in UI/UX design processes, ensuring consistent and
+                    user&#8209;friendly interfaces
+                </div>
+                <div class="li">Work as part of a frontend development team, contributing to shared codebases
+                    and collective technical decisions
+                </div>
+                <div class="li">Collaborate with cross-functional teams — including QA testers, designers, and
+                    backend developers
+                </div>
+            </div>
+        </TimelineEntry>
+        <TimelineEntry {...place("bachelor")}>
+            Specialization: Software Engineering.
+            <div class="mt">
+                Engineering thesis (awarded a distinction) presenting a self-built team collaboration platform.
+                Beyond core task management and live messaging, it featured AI-driven analytics — summarizing
+                team
+                performance from time-tracking data and automatically
+                condensing long comment threads into concise takeaways. Built with FastAPI and React.
+            </div>
+        </TimelineEntry>
+        <TimelineEntry {...place("technicalSchool")}>
+            Passed the professional IT exams EE.08 (computer systems, peripherals and networks) and EE.09 (programming, websites and databases).
+        </TimelineEntry>
+    </experience-timeline>
+</div>
+
+<style>
+    .content {
+        width: 100%;
+        max-width: var(--content-width);
+        margin: 90px auto;
+        padding: 0 var(--page-padding);
+        position: relative;
+    }
+
+    .timeline {
+        --ppm-base: 16px;
+        --ppm: var(--ppm-base);
+        --brace-r: 6px;
+        --brace-stroke: 1.5px;
+        --brace-gap: 10px;
+        --axis-gap: 7px;
+        --axis-color: rgba(237, 231, 220, 0.38);
+        --title-gap: 10px;
+        --stack-gap: 56px;
+
+        display: block;
+        position: relative;
+        margin-top: 64px;
+        height: calc(var(--headroom, 0px) + var(--span) * var(--ppm) + var(--overhang, 0px));
+        overflow-x: clip;
+    }
+
+    .axis {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        transform: translateX(-50%);
+        background-color: var(--axis-color);
+        mask-image: linear-gradient(to bottom, transparent, #000 20px, #000 calc(100% - 48px), transparent);
+    }
+
+    .legend {
+        margin: 16px 0 0 auto;
+        width: fit-content;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .legend-point {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--textSecondary);
+
+        &:before {
+            content: '';
+            display: block;
+            width: 32px;
+            height: 2px;
+            border-radius: 2px;
+        }
+    }
+
+    .legend-work {
+        &:before {
+            background-color: var(--accent);
+        }
+    }
+
+    .legend-education {
+        &:before {
+            background-color: var(--textTertiary);
+        }
+    }
+
+    .mt {
+        margin-top: 16px;
+    }
+
+    .ul {
+        display: flex;
+        flex-direction: column;
+        margin-top: 8px;
+        gap: 18px;
+
+        .li {
+            line-height: 1.45em;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+
+        .li::after {
+            display: none;
+            content: "";
+            min-width: 8px;
+            width: 8px;
+            height: 8px;
+            margin-left: 16px;
+            border-radius: 50%;
+            background-color: var(--textTertiary);
+        }
+    }
+
+    @media (min-width: 600px) {
+        .timeline {
+            --ppm-base: 10px;
+            --brace-r: 10px;
+            --brace-gap: 20px;
+            --axis-gap: 9px;
+            --title-gap: 12px;
+            --stack-gap: 72px;
+        }
+
+        .ul {
+            .li::after{
+                display: block;
+            }
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .timeline {
+            --brace-r: 13px;
+        }
+    }
+
+</style>
+
+<script>
+    import "./timeline";
+</script>

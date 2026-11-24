@@ -1,0 +1,257 @@
+---
+interface Props {
+    /** Unique per entry: namespaces the SVG clip/gradient ids. */
+    id: string;
+    kind: "work" | "education";
+    title: string;
+    place: string;
+    dates: string;
+    /** Months from the timeline origin. */
+    start: number;
+    /** Months from the timeline origin, or "now" to follow the live --now. */
+    end: number | "now";
+    /** Ongoing with no planned finish: drawn solid all the way, never dotted. */
+    open?: boolean;
+}
+
+const { id, kind, title, place, dates, start, end, open = false } = Astro.props;
+const past = `brace-${id}-past`;
+const future = `brace-${id}-future`;
+const rule = `brace-${id}-rule`;
+---
+
+<article
+    class:list={["entry", `entry-${kind}`]}
+    data-side={kind === "work" ? "left" : "right"}
+    data-start={start}
+    data-end={end}
+    data-open={open ? "" : undefined}
+    style={`--start: ${start}; --end: ${end === "now" ? "var(--now)" : end}`}
+    data-reveal
+>
+    <!-- Paths are drawn by timeline.ts: their length depends on the time scale. -->
+    <svg class="brace" aria-hidden="true" focusable="false">
+        <defs>
+            <clipPath id={past}><rect data-clip="past" x="-24" width="96" /></clipPath>
+            <clipPath id={future}><rect data-clip="future" x="-24" width="96" /></clipPath>
+            <linearGradient id={rule} gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="currentColor" />
+                <stop offset="1" stop-color="currentColor" stop-opacity="0.35" />
+            </linearGradient>
+        </defs>
+        <path class="rule" data-path="rule" stroke={`url(#${rule})`} pathLength="1" />
+        <path class="line" data-path="brace" clip-path={`url(#${past})`} />
+        <path class="line line-future" data-path="brace" clip-path={`url(#${future})`} />
+        <path class="hit" data-path="brace" />
+    </svg>
+
+    <div class="content">
+        <h3 class="title serif-title" data-stagger style="--i: 0">{title}</h3>
+        <h4 data-stagger style="--i: 1">{place}</h4>
+        <p class="dates" data-stagger style="--i: 1">{dates}</p>
+        <div class="description" data-stagger style="--i: 2">
+            <slot />
+        </div>
+    </div>
+</article>
+
+<style>
+    /* The entry box covers exactly start..end of the axis on its side of the line.
+       The brace fills its height; the beak, and the rule leaving it, sit at 50%. */
+    .entry {
+        position: absolute;
+        top: calc(var(--headroom, 0px) + (var(--span) - var(--end)) * var(--ppm));
+        height: calc((var(--end) - var(--start)) * var(--ppm));
+        /* --axis-gap keeps braces and text a hair off the axis so it stays readable. */
+        width: calc(50% - var(--axis-gap, 0px));
+        pointer-events: none;
+    }
+
+    .entry-work {
+        right: calc(50% + var(--axis-gap, 0px));
+        color: var(--accent);
+        --reveal-from: -24px;
+    }
+
+    .entry-education {
+        left: calc(50% + var(--axis-gap, 0px));
+        color: color-mix(in srgb, var(--textPrimary) 38%, var(--bgColor));
+        --reveal-from: 24px;
+    }
+
+    .entry-education:hover {
+        color: color-mix(in srgb, var(--textPrimary) 70%, var(--bgColor));
+    }
+
+    /* ── Brace ──────────────────────────────────────────────────────────────────── */
+    .brace {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+        pointer-events: none;
+        transition: filter 300ms ease, color 300ms ease;
+    }
+
+    /* Drawn as "}" with its ends on the axis; work entries mirror it into "{". */
+    .entry-work .brace {
+        transform: scaleX(-1);
+    }
+
+    .entry:hover .brace {
+        filter: drop-shadow(0 0 4px currentColor);
+    }
+
+    .line {
+        fill: none;
+        stroke: currentColor;
+        stroke-width: var(--brace-stroke);
+        stroke-linecap: round;
+        stroke-linejoin: miter;
+        stroke-miterlimit: 8;
+        transition: stroke-width 300ms ease;
+    }
+
+    .entry:hover .line {
+        stroke-width: calc(var(--brace-stroke) + 0.5px);
+    }
+
+    /* The part of a period that is still ahead. */
+    .line-future {
+        stroke-dasharray: 0 5;
+    }
+
+    .rule {
+        fill: none;
+        stroke-width: 1px;
+    }
+
+    /* Lets the brace itself be hovered, not just the text. */
+    .hit {
+        fill: none;
+        stroke: transparent;
+        stroke-width: 20px;
+        pointer-events: stroke;
+    }
+
+    /* ── Content ───────────────────────────────────────────────────────────────────
+       Its top edge is the rule; the title stands on it, the rest hangs below. */
+    .content {
+        position: absolute;
+        top: 50%;
+        width: calc(100% - 2 * var(--brace-r) - var(--brace-gap));
+        padding-top: 14px;
+        pointer-events: auto;
+    }
+
+    .entry-work .content {
+        right: calc(2 * var(--brace-r) + var(--brace-gap));
+        text-align: right;
+    }
+
+    .entry-education .content {
+        left: calc(2 * var(--brace-r) + var(--brace-gap));
+        text-align: left;
+    }
+
+    .title {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: calc(100% + var(--title-gap));
+        margin: 0;
+        line-height: 1.15;
+        color: var(--textPrimary);
+    }
+
+    h4 {
+        font-size: var(--fontSizeContent);
+        color: var(--textTertiary);
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .dates {
+        font-family: var(--fontTertiary);
+        font-size: 11px;
+        font-weight: 300;
+        color: var(--textTertiary);
+        margin-bottom: 14px;
+    }
+
+    .description {
+        font-size: var(--fontSizeContent);
+        color: var(--textSecondary);
+        font-weight: 400;
+        letter-spacing: 0.2px;
+        line-height: 1.4em;
+    }
+
+    /* ── Reveal: the brace opens out of its beak, the rule shoots out of the tip,
+       then the text follows. */
+    :global(html[data-js]) .brace {
+        clip-path: inset(50% -48px 50% -48px);
+        transition:
+            clip-path 1100ms cubic-bezier(0.16, 1, 0.3, 1),
+            filter 300ms ease,
+            color 300ms ease;
+    }
+
+    :global(html[data-js]) .entry.is-revealed .brace {
+        clip-path: inset(-48px);
+    }
+
+    :global(html[data-js]) .rule {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        transition: stroke-dashoffset 900ms cubic-bezier(0.16, 1, 0.3, 1) 250ms;
+    }
+
+    :global(html[data-js]) .entry.is-revealed .rule {
+        stroke-dashoffset: 0;
+    }
+
+    :global(html[data-js]) .entry [data-stagger] {
+        --reveal-delay: calc(350ms + var(--i, 0) * 90ms);
+
+        opacity: 0;
+        transform: translateX(var(--reveal-from, 0));
+        transition:
+            opacity 600ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay),
+            transform 600ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay);
+    }
+
+    :global(html[data-js]) .entry.is-revealed [data-stagger] {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :global(html[data-js]) .brace {
+            clip-path: none;
+            transition: none;
+        }
+
+        :global(html[data-js]) .rule {
+            stroke-dashoffset: 0;
+            transition: none;
+        }
+
+        :global(html[data-js]) .entry [data-stagger] {
+            opacity: 1;
+            transform: none;
+            transition: none;
+        }
+
+        .line {
+            transition: none;
+        }
+    }
+
+    @media (min-width: 600px) {
+        .dates {
+            font-size: 12px;
+        }
+    }
+</style>

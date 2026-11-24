@@ -1,0 +1,141 @@
+---
+import SectionHeader from "../SectionHeader.astro";
+
+type Tool = { name: string; tertiary?: boolean };
+
+const columns: Tool[][] = [
+    [
+        { name: "Node.js" },
+        { name: "TypeScript" },
+        { name: "JavaScript" },
+        { name: "HTML" },
+        { name: "CSS" },
+        { name: "Python", tertiary: true },
+    ],
+    [
+        { name: "React" },
+        { name: "NestJS" },
+        { name: "Next.js" },
+        { name: "Sass" },
+        { name: "Tailwind" },
+        { name: "FastAPI", tertiary: true },
+    ],
+    [
+        { name: "Git" },
+        { name: "Docker" },
+        { name: "Firebase", tertiary: true },
+        { name: "Figma", tertiary: true },
+        { name: "PostgreSQL", tertiary: true },
+    ],
+];
+---
+
+<div class="content">
+    <SectionHeader index="III" title="Tools & technologies" id="stack"/>
+    <p class="info">Technologies and tools I've worked with across personal and commercial projects.</p>
+    <div class="stack">
+        {
+            columns.map((column, col) => (
+                <div class="column">
+                    {column.map((tool) => (
+                        <span
+                            class:list={[tool.tertiary && "tertiary"]}
+                            data-reveal
+                            data-stagger
+                            style={`--i: ${col}`}
+                        >
+                            {tool.name}
+                        </span>
+                    ))}
+                </div>
+            ))
+        }
+    </div>
+</div>
+
+
+<style>
+
+    .info {
+        margin: 64px 0;
+        font-size: var(--fontSizeContent);
+        color: var(--textSecondary);
+    }
+
+    .content {
+        max-width: var(--content-width);
+        width: 100%;
+        padding: 0 var(--page-padding);
+        margin: 90px auto;
+    }
+
+    .stack {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        column-gap: 8px;
+        grid-template-rows: 1fr;
+    }
+
+    :global(html[data-js]) .stack [data-stagger] {
+        opacity: 0;
+        transform: translateY(10px);
+        transition:
+            opacity 450ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 150ms),
+            transform 450ms cubic-bezier(0.16, 1, 0.3, 1) calc(var(--i, 0) * 150ms);
+    }
+
+
+    :global(html[data-js]) .stack [data-stagger].is-revealed {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        :global(html[data-js]) .stack [data-stagger] {
+            opacity: 1;
+            transform: none;
+            transition: none;
+        }
+    }
+
+    .column {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        &:last-child {
+            border-right: none;
+        }
+
+        span {
+            padding: 4px;
+            font-size: var(--fontSizeContent);
+            color: var(--textSecondary);
+            border-bottom: 1px solid var(--separatorColor);
+
+
+            &.tertiary {
+                color: var(--textTertiary);
+            }
+        }
+    }
+
+
+    @media (min-width: 800px) {
+
+        .stack {
+            column-gap: 64px;
+        }
+    }
+
+    @media (min-width: 400px) {
+        .stack {
+            column-gap: 12px;
+
+            .column span {
+                padding: 16px;
+            }
+        }
+    }
+</style>

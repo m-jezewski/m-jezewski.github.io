@@ -1,0 +1,125 @@
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --fontSansSerif: "Instrument Sans", "Helvetica Neue", Helvetica, sans-serif;
+    --fontSerif: 'Newsreader', Georgia, sans-serif;
+    --fontTertiary: "Martian Mono", Georgia, monospace;
+
+    --textPrimary: #EDE7DC;
+    --textSecondary: rgba(237, 231, 220, .58);
+    --textTertiary: rgba(237, 231, 220, .38);
+    --accent: rgb(243, 222, 138);
+    --separatorColor: rgba(237, 231, 220, .15);
+    --separatorColor2: rgba(237, 231, 220, .05);
+    --bgColor: #0B0B0C;
+    --header-height: 72px;
+    --content-width: 100%;
+    --page-padding: 24px;
+
+    --fontSizeContent: 14px;
+}
+
+html, body {
+    scroll-behavior: smooth;
+    background-color: #0B0B0C;
+
+    font-family: "Instrument Sans", "Helvetica Neue", Helvetica, sans-serif;
+    text-wrap: pretty;
+    -webkit-font-smoothing: antialiased;
+    color: var(--textPrimary);
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body{
+    padding-top: var(--header-height);
+    scroll-padding-top: 90px;
+}
+
+h1,h2,h3,h4,h5,h6,p {
+    margin: 0;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.sans-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--textTertiary);
+    letter-spacing: 2px;
+    font-weight: 400;
+}
+
+.serif-title {
+    font-size: 20px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    font-family: var(--fontSerif);
+}
+
+@keyframes rise {
+    0% {
+        transform: translateY(110%);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@media (min-width: 600px){
+    :root {
+        --fontSizeContent: 16px;
+    }
+
+    .serif-title {
+        font-size: 26px;
+    }
+}
+
+@media (min-width: 680px) {
+    :root {
+        --header-height: 60px;
+    }
+}
+
+@media (min-width: 1024px) {
+    :root {
+        --content-width: 960px;
+        --page-padding: 32px;
+    }
+}
+
+@media (min-width: 1280px) {
+    :root {
+        --content-width: 1120px;
+        --page-padding: 32px;
+    }
+}
+
+@media (min-width: 1440px) {
+    :root {
+        --content-width: 1240px;
+        --page-padding: 40px;
+    }
+}
+
+@media (min-width: 2350px) {
+    :root {
+        --content-width: 1440px;
+        --page-padding: 48px;
+    }
+}
+
+@media (min-width: 2800px) {
+    :root {
+        --content-width: 1580px;
+        --page-padding: 64px;
+    }
+}

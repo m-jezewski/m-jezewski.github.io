@@ -1,0 +1,18 @@
+---
+import SectionHeader from "../SectionHeader.astro";
+import ProjectsSection from "./ProjectsSection.astro";
+---
+<div class="content">
+    <SectionHeader index="II" title="Selected projects" id="side-projects"/>
+    <ProjectsSection/>
+</div>
+
+<style>
+    .content {
+        width: 100%;
+        max-width: var(--content-width);
+        margin: 90px auto;
+        padding: 0 var(--page-padding);
+        position: relative;
+    }
+</style>

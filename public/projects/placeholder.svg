@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#101012"/>
+  <g fill="none" stroke="rgba(237,231,220,0.07)" stroke-width="1">
+    <path d="M80 0V720"/>
+    <path d="M160 0V720"/>
+    <path d="M240 0V720"/>
+    <path d="M320 0V720"/>
+    <path d="M400 0V720"/>
+    <path d="M480 0V720"/>
+    <path d="M560 0V720"/>
+    <path d="M640 0V720"/>
+    <path d="M720 0V720"/>
+    <path d="M800 0V720"/>
+    <path d="M880 0V720"/>
+    <path d="M960 0V720"/>
+    <path d="M1040 0V720"/>
+    <path d="M1120 0V720"/>
+    <path d="M1200 0V720"/>
+    <path d="M0 80H1280"/>
+    <path d="M0 160H1280"/>
+    <path d="M0 240H1280"/>
+    <path d="M0 320H1280"/>
+    <path d="M0 400H1280"/>
+    <path d="M0 480H1280"/>
+    <path d="M0 560H1280"/>
+    <path d="M0 640H1280"/>
+  </g>
+  <text x="640" y="352" text-anchor="middle" font-family="monospace" font-size="26" fill="#E3B767" letter-spacing="4">DEMO PLACEHOLDER</text>
+  <text x="640" y="396" text-anchor="middle" font-family="monospace" font-size="18" fill="rgba(237,231,220,0.4)">Third project</text>
+</svg>

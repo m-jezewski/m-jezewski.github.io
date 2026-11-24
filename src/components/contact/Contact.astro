@@ -1,0 +1,257 @@
+---
+import SectionHeader from '../SectionHeader.astro';
+
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/myyvjkky";
+---
+
+<div class="content">
+    <SectionHeader index="IV" title="Contact" id="contact"/>
+    <div class="row">
+        <table>
+            <tbody>
+            <tr>
+                <td>Email</td>
+                <td><a href="mailto:mac.jezewski@gmail.com">mac.jezewski@gmail.com</a></td>
+            </tr>
+            <tr>
+                <td>GitHub</td>
+                <td><a href="https://github.com/m-jezewski/">github.com/m-jezewski/</a></td>
+            </tr>
+            <tr>
+                <td>LinkedIn</td>
+                <td><a href="https://www.linkedin.com/in/maciej-jezewski/">linkedin.com/in/maciej-jezewski/</a></td>
+            </tr>
+            </tbody>
+        </table>
+        <contact-form>
+            <form action={FORMSPREE_ENDPOINT} method="POST">
+                <label>
+                    <span>Email</span>
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="email@domain.com"
+                        autocomplete="email"
+                        required
+                    />
+                </label>
+                <label>
+                    <span>Message</span>
+                    <textarea
+                        rows="5"
+                        name="message"
+                        placeholder="Your message…"
+                        required></textarea>
+                </label>
+                <input class="gotcha" type="text" name="_gotcha" tabindex="-1" autocomplete="off" />
+                <div class="row">
+                    <p class="status js-status" role="status"></p>
+                    <button type="submit">Send</button>
+                </div>
+            </form>
+        </contact-form>
+    </div>
+</div>
+
+<style>
+    .content {
+        width: 100%;
+        max-width: var(--content-width);
+        margin: 90px auto;
+        padding: 0 var(--page-padding);
+        position: relative;
+        --statusError: #E08A6F;
+
+        .row {
+            flex-direction: column;
+            align-items: start;
+            margin-top: 64px;
+            display: flex;
+            gap: 48px;
+        }
+
+        contact-form {
+            display: contents;
+        }
+
+        .gotcha {
+            display: none;
+        }
+
+        table {
+            width: 100%;
+
+            td {
+                &:first-child {
+                    color: var(--textTertiary);
+                }
+
+                &:last-child{
+                    text-align: right;
+
+                    a{
+                        transition: 150ms color ease-in-out;
+                        &:hover {
+                            color: var(--textPrimary);
+                        }
+                    }
+                }
+
+                font-size: var(--fontSizeContent);
+                color: var(--textSecondary);
+                padding: 16px 4px;
+                border-bottom: var(--separatorColor) solid 1px;
+            }
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        input:-webkit-autofill:active {
+            transition: background-color 9999s ease-in-out 0s, color 9999s ease-in-out 0s;
+        }
+
+        form {
+            width: 100%;
+            flex-grow: 1;
+
+            label {
+                display: flex;
+                flex-direction: column;
+                padding: 16px;
+
+                span {
+                    transition: 150ms color ease-in-out;
+                    font-size: var(--fontSizeContent);
+                    color: var(--textTertiary);
+                    font-weight: 400;
+                }
+
+                input {
+                    font-family: inherit;
+                    font-size: 16px;
+                    background: inherit;
+                    border: none;
+                    padding: 16px 1px;
+                    color: var(--textPrimary);
+                    outline: none;
+                    border-bottom: 1px solid var(--separatorColor);
+                    transition: border-color ease-in-out 150ms;
+                    letter-spacing: unset;
+                }
+
+                textarea {
+                    background: inherit;
+                    border: none;
+                    padding: 16px 1px;
+                    color: var(--textPrimary);
+                    font-size: 16px;
+                    outline: none;
+                    resize: none;
+                    transition: border-color ease-in-out 150ms;
+                    border-bottom: 1px solid var(--separatorColor);
+                    letter-spacing: unset;
+                    font-family: inherit;
+                }
+
+                &:focus-within {
+                    span {
+                        color: var(--textPrimary);
+                    }
+
+                    textarea,
+                    input {
+                        border-color: var(--textPrimary);
+                    }
+                }
+
+                input:user-invalid,
+                textarea:user-invalid {
+                    border-color: var(--statusError);
+                }
+            }
+
+            .status {
+                margin: 0 16px;
+                font-size: var(--fontSizeContent);
+                color: var(--textSecondary);
+                line-height: 1.4em;
+                min-height: 1.4em;
+            }
+
+            button {
+                margin: 4px 16px;
+                text-transform: uppercase;
+                font-family: var(--fontSansSerif);
+                font-size: 14px;
+                letter-spacing: 2px;
+                display: block;
+                padding: 8px 16px;
+                background: inherit;
+                position: relative;
+                color: var(--textSecondary);
+                outline: none;
+                border: none;
+                border-bottom: 1px solid var(--textTertiary);
+                font-weight: 400;
+                margin-left: auto;
+                transition: 150ms all ease-in-out;
+                cursor: pointer;
+
+                &:hover {
+                    border-color: var(--textPrimary);
+                    color: var(--textPrimary);
+                }
+
+                &:disabled {
+                    cursor: default;
+                    color: var(--textTertiary);
+                    border-color: var(--separatorColor);
+                }
+            }
+        }
+
+        contact-form[data-state="sent"] .status {
+            color: var(--accent);
+        }
+
+        contact-form[data-state="error"] .status {
+            color: var(--statusError);
+        }
+
+        @media (min-width: 800px) {
+            .row {
+                flex-direction: row;
+                gap: 96px;
+            }
+
+            table{
+                width: unset;
+
+                td {
+                    padding: 16px;
+                }
+            }
+
+            form {
+                width: unset;
+            }
+        }
+
+        @media (min-width: 450px) {
+            table{
+                td {
+                    padding: 16px 8px;
+
+                    &:last-child{
+                        text-align: left;
+                    }
+                }
+            }
+        }
+    }
+</style>
+
+<script>
+    import "./contact-form";
+</script>

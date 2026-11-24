@@ -1,0 +1,30 @@
+---
+
+    const { index, title, id } = Astro.props;
+---
+
+
+<div id={id} class="section-header">
+    <h2>
+        <span class="index">{index}</span> <span class="sans-title">{title}</span>
+    </h2>
+</div>
+
+<style>
+    h2 {
+        border-bottom: var(--separatorColor) solid 1px;
+        padding-bottom: 32px;
+    }
+
+    .section-header{
+        scroll-margin: 82px;
+    }
+
+    .index {
+        color: var(--textSecondary);
+        font-family: var(--fontSerif);
+        font-weight: 400;
+        font-size: 24px;
+        margin-right: 8px;
+    }
+</style>
